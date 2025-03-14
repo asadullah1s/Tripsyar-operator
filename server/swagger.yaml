@@ -1,0 +1,497 @@
+openapi: 3.0.0
+info:
+  title: Tripsyar API
+  version: 1.0.0
+  description: API for managing travel agencies and authentication
+  contact:
+    name: API Support
+    email: support@tripsyar.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:3001/api
+    description: Local development server
+  - url: https://api.tripsyar.com
+    description: Production server
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      
+  schemas:
+    Agency:
+      type: object
+      required:
+        - salutation
+        - firstName
+        - lastName
+        - email
+        - phone
+        - jobTitle
+        - country
+        - city
+        - address
+        - companyName
+        - companyAddress
+        - businessType
+        - secpStatus
+        - ptdcStatus
+        - companyCity
+        - province
+        - postalCode
+        - companyCountry
+        - companyPhone
+        - companyEmail
+      properties:
+        # Personal Info
+        salutation:
+          type: string
+          minLength: 1
+          example: "Mr"
+          description: Title/prefix for the contact person
+        firstName:
+          type: string
+          minLength: 2
+          maxLength: 50
+          example: "Muhammad Asadullah"
+        lastName:
+          type: string
+          minLength: 2
+          maxLength: 50
+          example: "Qureshi"
+        email:
+          type: string
+          format: email
+          example: "asadullah12q@gmail.com"
+        phone:
+          type: string
+          pattern: '^(\+92[\s-]?\d{3}[\s-]?\d{7}|0\d{10})$'
+          example: "03209093025"
+          description: Pakistani phone number format
+        jobTitle:
+          type: string
+          minLength: 2
+          maxLength: 50
+          example: "CEO"
+
+        # Address
+        country:
+          type: string
+          minLength: 2
+          maxLength: 50
+          example: "Pakistan"
+        city:
+          type: string
+          minLength: 2
+          maxLength: 50
+          example: "Haripur"
+        address:
+          type: string
+          minLength: 2
+          maxLength: 50
+          example: "Main Street"
+
+        # Company Details
+        companyName:
+          type: string
+          minLength: 2
+          maxLength: 50
+          example: "Tripsyar"
+        companyAddress:
+          type: string
+          minLength: 2
+          maxLength: 50
+          example: "Commercial Area"
+        businessType:
+          type: string
+          enum: [SOLE, PARTNERSHIP, CORPORATION]
+          example: "SOLE"
+        secpStatus:
+          type: string
+          enum: [active, inactive, suspended]
+          example: "active"
+        ptdcStatus:
+          type: string
+          enum: [active, inactive, suspended]
+          example: "active"
+        companyCity:
+          type: string
+          minLength: 2
+          maxLength: 50
+          example: "Haripur"
+        province:
+          type: string
+          enum: [Punjab, Sindh, KPK, Balochistan, Gilgit-Baltistan]
+          example: "KPK"
+        postalCode:
+          type: string
+          minLength: 2
+          maxLength: 10
+          example: "22660"
+        companyCountry:
+          type: string
+          minLength: 2
+          maxLength: 50
+          example: "Pakistan"
+        companyPhone:
+          type: string
+          pattern: '^(\+92[\s-]?\d{3}[\s-]?\d{7}|0\d{10})$'
+          example: "03209093025"
+        companyPhone2:
+          type: string
+          pattern: '^(\+92[\s-]?\d{3}[\s-]?\d{7}|0\d{10})$'
+          nullable: true
+          example: "03209093025"
+        companyPhone3:
+          type: string
+          pattern: '^(\+92[\s-]?\d{3}[\s-]?\d{7}|0\d{10})$'
+          nullable: true
+          example: "03209093025"
+        companyEmail:
+          type: string
+          format: email
+          example: "info@tripsyar.com"
+
+        # Social Media
+        socialMediaDetails:
+          type: array
+          maxItems: 10
+          nullable: true
+          items:
+            $ref: '#/components/schemas/SocialMedia'
+
+        # Tour Details
+        tourDetails:
+          type: array
+          maxItems: 50
+          nullable: true
+          items:
+            $ref: '#/components/schemas/Tour'
+
+    SocialMedia:
+      type: object
+      required:
+        - platform
+        - url
+      properties:
+        platform:
+          type: string
+          enum: [Website, Facebook, Instagram, TikTok, Twitter]
+          example: "Instagram"
+        url:
+          type: string
+          format: uri
+          maxLength: 100
+          example: "https://instagram.com/tripsyar"
+        rating:
+          type: number
+          minimum: 0
+          maximum: 5
+          multipleOf: 0.5
+          example: 4.5
+        likes:
+          type: integer
+          minimum: 0
+          example: 1000
+        followers:
+          type: integer
+          minimum: 0
+          example: 5000
+
+    Tour:
+      type: object
+      required:
+        - name
+        - source
+        - destination
+        - price
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 50
+          example: "Naran Valley Tour"
+        source:
+          type: string
+          minLength: 2
+          maxLength: 50
+          example: "Islamabad"
+        destination:
+          type: string
+          minLength: 2
+          maxLength: 50
+          example: "Naran"
+        price:
+          type: number
+          minimum: 0
+          maximum: 10000
+          example: 25000
+
+    Error:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: string
+          example: "Validation error"
+        details:
+          type: object
+          additionalProperties:
+            type: string
+          example:
+            firstName: "First name must be at least 2 characters long"
+            phone: "Invalid phone number format"
+
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          description: JWT access token
+
+paths:
+  /auth/sessions:
+    post:
+      tags: [Authentication]
+      summary: User login
+      operationId: loginUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "user@example.com"
+                password:
+                  type: string
+                  format: password
+                  example: "securepassword123"
+      responses:
+        200:
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        401:
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/register:
+    post:
+      tags: [Authentication]
+      summary: Register new user
+      operationId: registerUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, username, email, password]
+              properties:
+                name:
+                  type: string
+                  minLength: 2
+                  example: "John Doe"
+                username:
+                  type: string
+                  minLength: 3
+                  example: "johndoe"
+                email:
+                  type: string
+                  format: email
+                  example: "john@example.com"
+                password:
+                  type: string
+                  format: password
+                  minLength: 6
+                  example: "securepassword123"
+      responses:
+        201:
+          description: User registered successfully
+        409:
+          description: Conflict - User already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /agencies:
+    get:
+      tags: [Agencies]
+      summary: Get all agencies
+      operationId: getAllAgencies
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: List of agencies
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    example: 5
+                  agencies:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Agency'
+    post:
+      tags: [Agencies]
+      summary: Create new agency
+      operationId: createAgency
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Agency'
+      responses:
+        201:
+          description: Agency created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Agency created successfully"
+                  agency:
+                    $ref: '#/components/schemas/Agency'
+                  token:
+                    type: string
+                    description: JWT token for the created agency
+        409:
+          description: Conflict - Company or email already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        422:
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /agencies/{id}:
+    get:
+      tags: [Agencies]
+      summary: Get agency by ID
+      operationId: getAgencyById
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: mongoId
+          example: "507f1f77bcf86cd799439011"
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Agency details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Agency'
+        404:
+          description: Agency not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    
+    put:
+      tags: [Agencies]
+      summary: Update agency
+      operationId: updateAgency
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: mongoId
+          example: "507f1f77bcf86cd799439011"
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Agency'
+      responses:
+        200:
+          description: Agency updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Agency updated successfully"
+                  agency:
+                    $ref: '#/components/schemas/Agency'
+        404:
+          description: Agency not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      tags: [Agencies]
+      summary: Delete agency
+      operationId: deleteAgency
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: mongoId
+          example: "507f1f77bcf86cd799439011"
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Agency deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Agency deleted successfully"
+                  agency:
+                    $ref: '#/components/schemas/Agency'
+        404:
+          description: Agency not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'

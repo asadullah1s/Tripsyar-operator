@@ -1,0 +1,11 @@
+# Node.js
+node_modules/
+.env
+.npm/
+.next/
+out/
+dist/
+
+# Logs
+logs/
+*.log

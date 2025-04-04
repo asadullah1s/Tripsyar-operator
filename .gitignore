@@ -1,0 +1,36 @@
+# Node.js dependencies
+/node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Next.js build outputs
+.next/
+out/
+dist/
+
+# Logs
+logs
+*.log
+yarn-error.log
+npm-debug.log
+
+# Env files
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+
+# Cache
+.cache/
+.vercel/
+.vscode/
+.DS_Store
+.idea/
+
+# Other
+*.swp
+*.swo
+.qodo

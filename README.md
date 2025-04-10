@@ -1,4 +1,4 @@
-# Travel Agency Management System
+# Tripsyar Operator
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -76,8 +76,8 @@ A full-stack application for managing travel agencies, tours, and user authentic
 
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/travel-agency-system.git
-cd travel-agency-system
+git clone https://github.com/https://github.com/asadullah1s/Tripsyar-operator.git
+cd Tripsyar-operator
 
 # Install client dependencies
 cd client
